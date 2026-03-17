@@ -34,6 +34,15 @@ class LayerNorm(nn.Module):
         else:
             return x_hat
         
+class BatchNorm(nn.Module):
+    pass
+
+class RMSNorm(nn.Module):
+    pass
+
+class QKNorm(nn.Module):
+    pass
+        
 
 if __name__ == "__main__":
     batch_size, seq_length, hidden_size = 16, 20, 768

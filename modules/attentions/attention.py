@@ -72,7 +72,7 @@ class MultiHeadAttention(nn.Module):
         batch_size, num_heads, seq_len, head_dim = x.size()
         return x.transpose(1, 2).contiguous().view(batch_size, seq_len, num_heads*head_dim)
 
-    def forward(self, x: torch.Tensor, mask: torch.Tensor=None):
+    def forward(self, x: torch.Tensor, masked=False):
         query = self.proj_q(x)
         key = self.proj_k(x)
         value = self.proj_v(x)
@@ -80,23 +80,16 @@ class MultiHeadAttention(nn.Module):
         key_splited = self.split_heads(key)
         value_splited = self.split_heads(value)
 
-        if mask is not None:
+        if masked:
+            seq_len = x.size(1)
+            mask = torch.tril(torch.ones(seq_len, seq_len)).unsqueeze(0)
             mask = mask.unsqueeze(1)
+        else:
+            mask = None
 
         out, scores = self.attention(query_splited, key_splited, value_splited, mask=mask)
         out = self.combine_heads(out)
         return self.proj_o(out), scores
-
-
-class MaskedMultiHeadAttention(MultiHeadAttention):
-
-    def __init__(self, d_model, num_heads):
-        super(MaskedMultiHeadAttention, self).__init__(d_model, num_heads)
-
-    def forward(self, x):
-        seq_len = x.size(1)
-        mask = torch.tril(torch.ones(seq_len, seq_len)).unsqueeze(0)
-        return super().forward(x, mask)
 
 
 
@@ -125,8 +118,8 @@ if __name__ == "__main__":
     x = torch.randn(batch_size, seq_len, d_model)
 
     # mha = MultiHeadAttention(d_model, num_heads=12)
-    mmha = MaskedMultiHeadAttention(d_model, num_heads=12)
-    output, scores = mmha(x)
+    mmha = MultiHeadAttention(d_model, num_heads=12)
+    output, scores = mmha(x, masked=True)
     print(f"output size is {output.size()}")
     print(f"score size is {scores.size()}")
     print(f"score is {scores[0]}")
