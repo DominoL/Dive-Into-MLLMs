@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
-from layers_old.attention import MultiHeadAttention
-from layers_old.feed_forward import PositionwiseFeedForward
+from modules.attentions import MultiHeadAttention
+from modules.layers import PositionwiseFeedForward
 
 
 class TransformerDecoderBlock(nn.Module):

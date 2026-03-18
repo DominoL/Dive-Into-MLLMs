@@ -1,7 +1,7 @@
 import math
 import torch
 import torch.nn as nn
-from embeddings.positional_encoding import PositionalEncoding
+from modules.positional_encoding import sinusoidal_positional_encoding
 from blocks.decoder_layer import TransformerDecoderBlock
 
 
@@ -17,7 +17,6 @@ class TransformerDecoder(nn.Module):
         super(TransformerDecoder, self).__init__()
         self.d_model = d_model
         self.token_embed = nn.Embedding(vocab_size, d_model)
-        self.pos_encoder = PositionalEncoding(d_model, max_seq_len)
         
         # 堆叠Decoder块
         self.layers = nn.ModuleList([
@@ -72,7 +71,7 @@ class TransformerDecoder(nn.Module):
         token_embeds = self.token_embed(input_ids)  # [batch, seq, d_model]
         token_embeds = token_embeds * math.sqrt(self.d_model)  # 缩放嵌入
         # 位置编码
-        embeddings = self.pos_encoder(token_embeds)
+        embeddings = sinusoidal_positional_encoding(token_embeds)
         embeddings = self.dropout(embeddings)
         # 创建因果掩码
         causal_mask = self.create_causal_mask(seq_len).to(input_ids.device)

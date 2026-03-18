@@ -17,7 +17,7 @@ def rotate_positional_encoding(x):
     div_term = torch.exp(torch.arange(0, head_dim).float() * (-math.log(1000) / head_dim))
     cos = torch.cos(position * div_term)
     sin = torch.sin(position * div_term)
-    x1, x2 = x[:, 0::2], x[:, 1::2]
+    x1, x2 = x[..., 0::2], x[..., 1::2]
     rotated_x1 = x1*cos - x2*sin
     rotated_x2 = x1*sin + x2*cos
     return torch.stack([rotated_x1, rotated_x2], dim=-1).flatten(-2)
